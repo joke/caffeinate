@@ -6,10 +6,8 @@ import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
 import io.github.joke.objects.strategy.ClassModel;
 import io.github.joke.objects.strategy.GenerationStrategy;
-
 import java.io.IOException;
 import java.util.Set;
-
 import javax.annotation.processing.Filer;
 import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
@@ -42,7 +40,8 @@ public class ImmutableGenerator {
         TypeSpec typeSpec = builder.build();
 
         ClassName sourceClass = ClassName.get(source);
-        JavaFile javaFile = JavaFile.builder(sourceClass.packageName(), typeSpec).build();
+        JavaFile javaFile =
+                JavaFile.builder(sourceClass.packageName(), typeSpec).build();
         javaFile.writeTo(filer);
     }
 }

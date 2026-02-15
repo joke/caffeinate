@@ -4,5 +4,6 @@ plugins {
 }
 
 dependencies {
-    compileOnly 'org.apache.commons:commons-lang3:3.12.0'
+    compileOnly platform(project(':dependencies'))
+    compileOnly 'org.jspecify:jspecify'
 }

@@ -1,11 +1,11 @@
 package io.github.joke.objects.customize;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
 import static io.github.joke.objects.customize.ToString.Style.STRING_JOINER;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
  * Customize the implementation of {@link Object#toString()}.

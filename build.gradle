@@ -1,6 +1,8 @@
 plugins {
     id 'net.ltgt.nullaway' apply false
     id 'net.ltgt.errorprone' apply false
+    id 'com.diffplug.gradle.spotless' apply false
+    id 'com.palantir.baseline' apply false
 }
 
 subprojects { project ->
@@ -10,18 +12,34 @@ subprojects { project ->
         mavenCentral()
     }
 
+    pluginManager.apply 'com.palantir.baseline-reproducibility'
+
     pluginManager.withPlugin('java-base') {
+        pluginManager.apply 'com.palantir.baseline-idea'
+        pluginManager.apply 'com.palantir.baseline-encoding'
+        pluginManager.apply 'com.palantir.baseline-java-compiler-diagnostics'
+        pluginManager.apply 'com.palantir.baseline-java-properties'
+        pluginManager.apply 'com.diffplug.spotless'
+        // pluginManager.apply 'com.palantir.baseline-format'
         tasks.withType(JavaCompile) {
             options.release = 11
-            options.compilerArgs << '-parameters' << '-Werror'
+            options.compilerArgs << '-Werror'
+        }
+    }
+
+    pluginManager.withPlugin('com.diffplug.spotless') {
+        spotless {
+            java {
+                forbidWildcardImports()
+                removeUnusedImports()
+                palantirJavaFormat('2.87.0')
+            }
         }
     }
 
     pluginManager.withPlugin('java') {
         pluginManager.apply 'net.ltgt.errorprone'
-        tasks.withType(Test).configureEach {
-           useJUnitPlatform()
-        }
+        pluginManager.apply 'com.palantir.baseline-testing'
     }
 
     pluginManager.withPlugin('net.ltgt.errorprone') {
@@ -29,15 +47,30 @@ subprojects { project ->
         dependencies {
             errorprone('com.google.errorprone:error_prone_core:2.47.0')
         }
+        tasks.withType(JavaCompile).configureEach {
+            options.errorprone {
+                disableWarningsInGeneratedCode = true
+            }
+        }
     }
 
     pluginManager.withPlugin('net.ltgt.nullaway') {
         dependencies {
             errorprone('com.uber.nullaway:nullaway:0.13.1')
         }
-        nullaway {
-            onlyNullMarked = true
-            jspecifyMode = true
+        tasks.withType(JavaCompile).configureEach {
+            options.errorprone {
+                error('RequireExplicitNullMarking')
+                nullaway {
+                    error()
+                    onlyNullMarked = true
+                    treatGeneratedAsUnannotated = true
+                    jspecifyMode = true
+                    suggestSuppressions = true
+                    checkContracts = true
+                    acknowledgeRestrictiveAnnotations = true
+                }
+            }
         }
     }
 }

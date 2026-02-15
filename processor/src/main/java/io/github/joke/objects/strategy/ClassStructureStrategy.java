@@ -1,7 +1,6 @@
 package io.github.joke.objects.strategy;
 
 import com.palantir.javapoet.ClassName;
-
 import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;

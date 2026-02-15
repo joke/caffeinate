@@ -1,10 +1,8 @@
 package io.github.joke.objects.strategy;
 
 import com.palantir.javapoet.TypeName;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.lang.model.element.Modifier;
 
 public class ClassModel {
