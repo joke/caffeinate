@@ -1,7 +1,9 @@
 package io.github.joke.objects.immutable;
 
 import com.palantir.javapoet.ClassName;
+import com.palantir.javapoet.FieldSpec;
 import com.palantir.javapoet.JavaFile;
+import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.TypeName;
 import com.palantir.javapoet.TypeSpec;
 import io.github.joke.objects.strategy.ClassModel;
@@ -15,18 +17,32 @@ import javax.lang.model.element.TypeElement;
 
 public class ImmutableGenerator {
 
-    private final Set<GenerationStrategy> strategies;
+    private final Set<GenerationStrategy> analysisStrategies;
+    private final Set<GenerationStrategy> generationStrategies;
     private final Filer filer;
 
     @Inject
-    ImmutableGenerator(Set<GenerationStrategy> strategies, Filer filer) {
-        this.strategies = strategies;
+    ImmutableGenerator(
+            @AnalysisPhase Set<GenerationStrategy> analysisStrategies,
+            @GenerationPhase Set<GenerationStrategy> generationStrategies,
+            Filer filer) {
+        this.analysisStrategies = analysisStrategies;
+        this.generationStrategies = generationStrategies;
         this.filer = filer;
     }
 
     public void generate(TypeElement source) throws IOException {
         ClassModel model = new ClassModel();
-        for (GenerationStrategy strategy : strategies) {
+
+        for (GenerationStrategy strategy : analysisStrategies) {
+            strategy.generate(source, model);
+        }
+
+        if (model.hasErrors()) {
+            return;
+        }
+
+        for (GenerationStrategy strategy : generationStrategies) {
             strategy.generate(source, model);
         }
 
@@ -36,6 +52,12 @@ public class ImmutableGenerator {
         }
         for (TypeName superinterface : model.getSuperinterfaces()) {
             builder.addSuperinterface(superinterface);
+        }
+        for (FieldSpec field : model.getFields()) {
+            builder.addField(field);
+        }
+        for (MethodSpec method : model.getMethods()) {
+            builder.addMethod(method);
         }
         TypeSpec typeSpec = builder.build();
 
