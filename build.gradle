@@ -6,7 +6,7 @@ plugins {
 }
 
 subprojects { project ->
-    group 'io.github.joke.objects'
+    group 'io.github.joke.caffeinate'
 
     repositories {
         mavenCentral()
