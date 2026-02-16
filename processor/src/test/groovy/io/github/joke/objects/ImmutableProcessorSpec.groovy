@@ -54,6 +54,35 @@ class ImmutableProcessorSpec extends Specification {
         }
     }
 
+    def 'generates field, getter, and constructor for single getter method'() {
+        given:
+        def source = JavaFileObjects.forSourceString('test.Person', '''\
+            package test;
+            import io.github.joke.objects.Immutable;
+            @Immutable
+            public interface Person {
+                String getFirstName();
+            }
+        ''')
+
+        when:
+        def compilation = javac()
+            .withProcessors(new ObjectsProcessor())
+            .compile(source)
+
+        then:
+        compilation.status() == Compilation.Status.SUCCESS
+
+        and:
+        def generated = compilation.generatedSourceFile('test.PersonImpl')
+            .get().getCharContent(true).toString()
+        generated.contains('private final String firstName')
+        generated.contains('public PersonImpl(String firstName)')
+        generated.contains('this.firstName = firstName')
+        generated.contains('public String getFirstName()')
+        generated.contains('return this.firstName')
+    }
+
     def 'fails when @Immutable applied to an enum'() {
         given:
         def source = JavaFileObjects.forSourceString('test.Color', '''\
