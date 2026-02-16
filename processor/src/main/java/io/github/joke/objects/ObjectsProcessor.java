@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import io.github.joke.objects.component.DaggerProcessorComponent;
 import io.github.joke.objects.component.ProcessorModule;
 import io.github.joke.objects.immutable.ImmutableSubcomponent;
+import io.github.joke.objects.mutable.MutableSubcomponent;
 import java.io.IOException;
 import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
@@ -20,6 +21,7 @@ import javax.tools.Diagnostic;
 public class ObjectsProcessor extends AbstractProcessor {
 
     private ImmutableSubcomponent immutableSubcomponent;
+    private MutableSubcomponent mutableSubcomponent;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -28,11 +30,14 @@ public class ObjectsProcessor extends AbstractProcessor {
                 .processorModule(new ProcessorModule(processingEnv))
                 .build();
         immutableSubcomponent = component.immutable().create();
+        mutableSubcomponent = component.mutable().create();
     }
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        return Set.of(Immutable.class.getCanonicalName());
+        return Set.of(
+                Immutable.class.getCanonicalName(),
+                Mutable.class.getCanonicalName());
     }
 
     @Override
@@ -41,24 +46,43 @@ public class ObjectsProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    public boolean process(
+            Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (TypeElement annotation : annotations) {
-            for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
+            String annotationName = annotation.getQualifiedName().toString();
+
+            for (Element element :
+                    roundEnv.getElementsAnnotatedWith(annotation)) {
                 if (element.getKind() != ElementKind.INTERFACE) {
                     processingEnv
                             .getMessager()
                             .printMessage(
-                                    Diagnostic.Kind.ERROR, "@Immutable can only be applied to interfaces", element);
+                                    Diagnostic.Kind.ERROR,
+                                    "@" + annotation.getSimpleName()
+                                            + " can only be applied"
+                                            + " to interfaces",
+                                    element);
                     continue;
                 }
                 try {
-                    immutableSubcomponent.generator().generate((TypeElement) element);
+                    if (annotationName.equals(
+                            Immutable.class.getCanonicalName())) {
+                        immutableSubcomponent
+                                .generator()
+                                .generate((TypeElement) element);
+                    } else if (annotationName.equals(
+                            Mutable.class.getCanonicalName())) {
+                        mutableSubcomponent
+                                .generator()
+                                .generate((TypeElement) element);
+                    }
                 } catch (IOException e) {
                     processingEnv
                             .getMessager()
                             .printMessage(
                                     Diagnostic.Kind.ERROR,
-                                    "Failed to generate implementation: " + e.getMessage(),
+                                    "Failed to generate implementation: "
+                                            + e.getMessage(),
                                     element);
                 }
             }

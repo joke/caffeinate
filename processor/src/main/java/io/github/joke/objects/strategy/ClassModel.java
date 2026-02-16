@@ -5,6 +5,7 @@ import com.palantir.javapoet.MethodSpec;
 import com.palantir.javapoet.TypeName;
 import java.util.ArrayList;
 import java.util.List;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 
 public class ClassModel {
@@ -16,6 +17,7 @@ public class ClassModel {
     private final List<Property> properties = new ArrayList<>();
     private final List<FieldSpec> fields = new ArrayList<>();
     private final List<MethodSpec> methods = new ArrayList<>();
+    private final List<ExecutableElement> declaredSetters = new ArrayList<>();
 
     public String getClassName() {
         return className;
@@ -51,5 +53,9 @@ public class ClassModel {
 
     public List<MethodSpec> getMethods() {
         return methods;
+    }
+
+    public List<ExecutableElement> getDeclaredSetters() {
+        return declaredSetters;
     }
 }
