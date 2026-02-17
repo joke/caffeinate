@@ -2,6 +2,7 @@
 repository:
   name: caffeinate
   description: A Java annotation processor that generates implementation classes from annotated interfaces
+  homepage: https://joke.github.io/caffeinate/
   topics: java, annotation-processor, code-generation
   private: false
   has_issues: true

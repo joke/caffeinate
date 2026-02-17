@@ -1,6 +1,6 @@
 site_name: Caffeinate
 site_description: An annotation processor for generating Java boilerplate
-site_url: https://joke.github.io/objects2/
+site_url: https://joke.github.io/caffeinate/
 
 theme:
   name: material
