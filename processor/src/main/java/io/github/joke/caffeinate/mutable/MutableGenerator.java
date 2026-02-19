@@ -63,6 +63,9 @@ public class MutableGenerator {
         for (TypeName superinterface : model.getSuperinterfaces()) {
             builder.addSuperinterface(superinterface);
         }
+        if (model.getSuperclass() != null) {
+            builder.superclass(model.getSuperclass());
+        }
         for (FieldSpec field : model.getFields()) {
             builder.addField(field);
         }
