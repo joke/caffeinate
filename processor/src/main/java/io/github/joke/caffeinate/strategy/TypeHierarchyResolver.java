@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -30,7 +31,10 @@ public class TypeHierarchyResolver {
 
     private void collectAbstractMethods(TypeElement element, List<ExecutableElement> result, Set<String> seen) {
         for (TypeMirror iface : element.getInterfaces()) {
-            collectAbstractMethods((TypeElement) types.asElement(iface), result, seen);
+            Element ifaceElement = types.asElement(iface);
+            if (ifaceElement instanceof TypeElement) {
+                collectAbstractMethods((TypeElement) ifaceElement, result, seen);
+            }
         }
 
         TypeMirror superclass = element.getSuperclass();
