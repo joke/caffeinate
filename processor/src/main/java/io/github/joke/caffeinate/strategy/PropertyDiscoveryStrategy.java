@@ -4,21 +4,22 @@ import javax.annotation.processing.Messager;
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 
 public class PropertyDiscoveryStrategy implements GenerationStrategy {
 
     private final Messager messager;
+    private final TypeHierarchyResolver resolver;
 
     @Inject
-    PropertyDiscoveryStrategy(Messager messager) {
+    PropertyDiscoveryStrategy(Messager messager, TypeHierarchyResolver resolver) {
         this.messager = messager;
+        this.resolver = resolver;
     }
 
     @Override
     public void generate(TypeElement source, ClassModel model) {
-        for (ExecutableElement method : ElementFilter.methodsIn(source.getEnclosedElements())) {
+        for (ExecutableElement method : resolver.getAllAbstractMethods(source)) {
             if (PropertyUtils.isGetterMethod(method)) {
                 model.getProperties().add(PropertyUtils.extractProperty(method));
             } else {
@@ -37,7 +38,7 @@ public class PropertyDiscoveryStrategy implements GenerationStrategy {
         } else {
             messager.printMessage(
                     Diagnostic.Kind.ERROR,
-                    "Methods in @Immutable interfaces must follow" + " get*/is* naming convention",
+                    "Methods in @Immutable interfaces must follow get*/is* naming convention",
                     method);
         }
         model.setHasErrors(true);
