@@ -4,6 +4,7 @@ import javax.annotation.processing.Messager;
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 import javax.tools.Diagnostic;
 
 public class PropertyDiscoveryStrategy implements GenerationStrategy {
@@ -32,7 +33,7 @@ public class PropertyDiscoveryStrategy implements GenerationStrategy {
         if (!method.getParameters().isEmpty()) {
             messager.printMessage(
                     Diagnostic.Kind.ERROR, "Methods in @Immutable interfaces must have no parameters", method);
-        } else if (method.getReturnType().getKind() == javax.lang.model.type.TypeKind.VOID) {
+        } else if (method.getReturnType().getKind() == TypeKind.VOID) {
             messager.printMessage(
                     Diagnostic.Kind.ERROR, "Methods in @Immutable interfaces must not return void", method);
         } else {
