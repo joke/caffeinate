@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import org.jspecify.annotations.Nullable;
 
 public class ClassModel {
 
@@ -14,6 +15,7 @@ public class ClassModel {
     private boolean hasErrors = false;
     private final List<Modifier> modifiers = new ArrayList<>();
     private final List<TypeName> superinterfaces = new ArrayList<>();
+    private @Nullable TypeName superclass = null;
     private final List<Property> properties = new ArrayList<>();
     private final List<FieldSpec> fields = new ArrayList<>();
     private final List<MethodSpec> methods = new ArrayList<>();
@@ -41,6 +43,14 @@ public class ClassModel {
 
     public List<TypeName> getSuperinterfaces() {
         return superinterfaces;
+    }
+
+    public @Nullable TypeName getSuperclass() {
+        return superclass;
+    }
+
+    public void setSuperclass(TypeName superclass) {
+        this.superclass = superclass;
     }
 
     public List<Property> getProperties() {
