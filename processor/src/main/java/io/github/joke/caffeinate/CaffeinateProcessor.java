@@ -6,6 +6,7 @@ import io.github.joke.caffeinate.component.ProcessorModule;
 import io.github.joke.caffeinate.immutable.ImmutableSubcomponent;
 import io.github.joke.caffeinate.mutable.MutableSubcomponent;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -14,7 +15,10 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 
 @AutoService(Processor.class)
@@ -49,15 +53,32 @@ public class CaffeinateProcessor extends AbstractProcessor {
             String annotationName = annotation.getQualifiedName().toString();
 
             for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
-                if (element.getKind() != ElementKind.INTERFACE) {
+                boolean isInterface = element.getKind() == ElementKind.INTERFACE;
+                boolean isAbstractClass = element.getKind() == ElementKind.CLASS
+                        && element.getModifiers().contains(Modifier.ABSTRACT);
+
+                if (!isInterface && !isAbstractClass) {
                     processingEnv
                             .getMessager()
                             .printMessage(
                                     Diagnostic.Kind.ERROR,
-                                    "@" + annotation.getSimpleName() + " can only be applied" + " to interfaces",
+                                    "@" + annotation.getSimpleName()
+                                            + " can only be applied to interfaces or abstract classes",
                                     element);
                     continue;
                 }
+
+                if (isAbstractClass && !hasNoArgsConstructor((TypeElement) element)) {
+                    processingEnv
+                            .getMessager()
+                            .printMessage(
+                                    Diagnostic.Kind.ERROR,
+                                    "@" + annotation.getSimpleName()
+                                            + " on abstract classes requires a no-args constructor",
+                                    element);
+                    continue;
+                }
+
                 try {
                     if (annotationName.equals(Immutable.class.getCanonicalName())) {
                         immutableSubcomponent.generator().generate((TypeElement) element);
@@ -75,5 +96,13 @@ public class CaffeinateProcessor extends AbstractProcessor {
             }
         }
         return false;
+    }
+
+    private boolean hasNoArgsConstructor(TypeElement element) {
+        List<ExecutableElement> constructors = ElementFilter.constructorsIn(element.getEnclosedElements());
+        if (constructors.isEmpty()) {
+            return true;
+        }
+        return constructors.stream().anyMatch(c -> c.getParameters().isEmpty());
     }
 }
