@@ -12,4 +12,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v3
       - uses: gradle/actions/setup-gradle@v5
-      - run: ./gradlew build
+      - run: ./gradlew check
+      - name: Test Report
+        uses: dorny/test-reporter@v2
+        if: ${{ !cancelled() }}
+        with:
+          name: rests
+          path: '**/test-results/test/TEST-*xml'
+          reporter: java-junit
