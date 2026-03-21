@@ -39,7 +39,8 @@ The build enforces strict quality standards — all warnings are errors (`-Werro
 
 ## Conventions
 
-- Group ID: `io.github.joke.objects`
-- Package root: `io.github.joke.objects`
+- Group ID: `io.github.joke.caffeinate`
+- Package root: `io.github.joke.caffeinate
+- `
 - Tests use Spock (Groovy BDD framework) — test files are `*.groovy` specs
 - Processor compile-time tests use Google Compile Testing to verify generated code

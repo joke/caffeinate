@@ -25,8 +25,7 @@ public class ConstructorStrategy implements GenerationStrategy {
         }
 
         for (Property property : model.getProperties()) {
-            ParameterSpec.Builder param = ParameterSpec.builder(
-                    property.getType(), property.getFieldName());
+            ParameterSpec.Builder param = ParameterSpec.builder(property.getType(), property.getFieldName());
             property.getAnnotations().forEach(param::addAnnotation);
             constructor.addParameter(param.build());
             constructor.addStatement("this.$N = $N", property.getFieldName(), property.getFieldName());

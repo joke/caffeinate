@@ -13,8 +13,8 @@ public class FieldStrategy implements GenerationStrategy {
     @Override
     public void generate(TypeElement source, ClassModel model) {
         for (Property property : model.getProperties()) {
-            FieldSpec.Builder field = FieldSpec.builder(
-                            property.getType(), property.getFieldName(), Modifier.PRIVATE, Modifier.FINAL);
+            FieldSpec.Builder field =
+                    FieldSpec.builder(property.getType(), property.getFieldName(), Modifier.PRIVATE, Modifier.FINAL);
             property.getAnnotations().forEach(field::addAnnotation);
             model.getFields().add(field.build());
         }

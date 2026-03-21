@@ -20,8 +20,10 @@ subprojects { project ->
         pluginManager.apply 'com.palantir.baseline-java-compiler-diagnostics'
         pluginManager.apply 'com.palantir.baseline-java-properties'
         pluginManager.apply 'com.diffplug.spotless'
+        pluginManager.apply 'net.ltgt.errorprone'
+        pluginManager.apply 'jacoco'
         // pluginManager.apply 'com.palantir.baseline-format'
-        tasks.withType(JavaCompile) {
+        tasks.withType(JavaCompile).configureEach {
             options.release = 11
             options.compilerArgs << '-Werror'
         }
@@ -38,14 +40,39 @@ subprojects { project ->
     }
 
     pluginManager.withPlugin('java') {
-        pluginManager.apply 'net.ltgt.errorprone'
         pluginManager.apply 'com.palantir.baseline-testing'
+    }
+
+    pluginManager.withPlugin('jacoco') {
+        tasks.withType(JacocoReport).configureEach {
+            dependsOn test
+            reports {
+                xml.required = true
+            }
+        }
+        tasks.withType(JacocoCoverageVerification).configureEach {
+            violationRules {
+                rule {
+                    limit {
+                        counter = 'BRANCH'
+                        value = 'COVEREDRATIO'
+                        minimum = 0.7
+                    }
+                }
+            }
+        }
+        tasks.withType(Test).configureEach {
+            finalizedBy jacocoTestReport
+        }
+        tasks.named('check') {
+            dependsOn jacocoTestCoverageVerification
+        }
     }
 
     pluginManager.withPlugin('net.ltgt.errorprone') {
         pluginManager.apply 'net.ltgt.nullaway'
         dependencies {
-            errorprone('com.google.errorprone:error_prone_core:2.47.0')
+            errorprone('com.google.errorprone:error_prone_core:2.48.0')
         }
         tasks.withType(JavaCompile).configureEach {
             options.errorprone {
